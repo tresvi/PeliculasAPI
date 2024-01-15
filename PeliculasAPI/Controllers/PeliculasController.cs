@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using PeliculasAPI.DTOs;
 using PeliculasAPI.Entidades;
+using PeliculasAPI.Migrations;
 using PeliculasAPI.Servicios;
 
 namespace PeliculasAPI.Controllers
@@ -60,6 +61,7 @@ namespace PeliculasAPI.Controllers
                 }
             }
 
+            AsignarOrdenActores(pelicula);
             _context.Add(pelicula);
             await _context.SaveChangesAsync();
             var peliculaDTO = _mapper.Map<PeliculaDTO>(pelicula);
@@ -71,7 +73,10 @@ namespace PeliculasAPI.Controllers
         [HttpPut("{id}")]
         public async Task<ActionResult> Put(int id, [FromForm] PeliculaCreacionDTO peliculaCreacionDTO)
         {
-            var peliculaDB = await _context.Peliculas.FirstOrDefaultAsync(x => x.Id == id);
+            var peliculaDB = await _context.Peliculas
+                .Include(x => x.PeliculasActores)
+                .Include(x => x.PeliculasGeneros)
+                .FirstOrDefaultAsync(x => x.Id == id);
 
             if (peliculaDB == null) { return NotFound(); }
 
@@ -90,6 +95,7 @@ namespace PeliculasAPI.Controllers
                 }
             }
 
+            AsignarOrdenActores(peliculaDB);
             //Solamente los campos que difieran seran actualizados por EF
             await _context.SaveChangesAsync();
             return NoContent();
@@ -132,5 +138,16 @@ namespace PeliculasAPI.Controllers
 
             return NoContent();
         }
+
+        private void AsignarOrdenActores(Pelicula pelicula)
+        {
+            if (pelicula.PeliculasActores == null) return;
+
+            for (int i = 0; i < pelicula.PeliculasActores.Count; i++)
+            {
+                pelicula.PeliculasActores[i].Orden = i;
+            }
+        }
+
     }
 }
