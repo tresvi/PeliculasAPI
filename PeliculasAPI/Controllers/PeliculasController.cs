@@ -96,8 +96,8 @@ namespace PeliculasAPI.Controllers
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex.Message, ex); //Podria devolverse un codigo de error para informar que pasó
-                    return BadRequest(ex.Message);
+                    _logger.LogError($"Campo para ordenar incorrecto. {ex.Message}", ex); //Podria devolverse un codigo de error para informar que pasó
+                    return BadRequest($"Campo para ordenar incorrecto. {ex.Message}");
                 }
 
                 
