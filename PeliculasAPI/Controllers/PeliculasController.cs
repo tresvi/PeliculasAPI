@@ -5,15 +5,15 @@ using Microsoft.EntityFrameworkCore;
 using PeliculasAPI.DTOs;
 using PeliculasAPI.Entidades;
 using PeliculasAPI.Helpers;
-using PeliculasAPI.Migrations;
 using PeliculasAPI.Servicios;
 using System.Linq.Dynamic.Core;
+
 
 namespace PeliculasAPI.Controllers
 {
     [ApiController]
     [Route("api/peliculas")]
-    public class PeliculasController : ControllerBase
+    public class PeliculasController : CustomBaseController
     {
         private const string CONTENEDOR_FOTOS_NAME = "peliculas";
 
@@ -26,6 +26,7 @@ namespace PeliculasAPI.Controllers
             , IMapper mapper
             , IAlmacenadorArchivos almacenadorArchivos
             , ILogger<PeliculasController> logger)
+            :base (context, mapper)
         {
             _context = context;
             _mapper = mapper;
@@ -172,39 +173,16 @@ namespace PeliculasAPI.Controllers
         [HttpPatch("{id}")]
         public async Task<ActionResult> Patch(int id, [FromBody] JsonPatchDocument<PeliculaPatchDTO> patchDocument)
         {
-            if (patchDocument == null) return BadRequest();
-
-            var entidadDB = await _context.Peliculas.FirstOrDefaultAsync(x => x.Id == id);
-
-            if (entidadDB == null) return NotFound();
-
-            var entidadDTO = _mapper.Map<PeliculaPatchDTO>(entidadDB);
-
-            patchDocument.ApplyTo(entidadDTO, ModelState);
-
-            var esValido = TryValidateModel(entidadDTO);
-
-            if (!esValido) return BadRequest(ModelState);
-
-            _mapper.Map(entidadDTO, entidadDB);
-
-            await _context.SaveChangesAsync();
-
-            return NoContent();
+            return await Patch<Pelicula, PeliculaPatchDTO>(id, patchDocument);
         }
 
 
         [HttpDelete("{id}")]
         public async Task<ActionResult> Delete(int id)
         {
-            var existe = await _context.Peliculas.AnyAsync(x => x.Id == id);
-            if (!existe) return NotFound();
-
-            _context.Remove(new Pelicula() { Id = id });
-            await _context.SaveChangesAsync();
-
-            return NoContent();
+            return await Delete<Pelicula>(id);
         }
+
 
         private void AsignarOrdenActores(Pelicula pelicula)
         {
