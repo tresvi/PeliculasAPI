@@ -1,4 +1,8 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using AutoMapper;
+using Microsoft.EntityFrameworkCore;
+using NetTopologySuite;
+using NetTopologySuite.Geometries;
+using PeliculasAPI.Helpers;
 using PeliculasAPI.Servicios;
 
 //Performance rules https://learn.microsoft.com/en-us/dotnet/fundamentals/code-analysis/quality-rules/ca1828
@@ -21,8 +25,20 @@ namespace PeliculasAPI
             services.AddTransient<IAlmacenadorArchivos, AlmacenadorArchivosAzure>();
             services.AddHttpContextAccessor();
 
+            services.AddSingleton<GeometryFactory>(NtsGeometryServices.Instance.CreateGeometryFactory(srid: 4326));
+
+            services.AddSingleton(provider =>
+                new MapperConfiguration(config =>
+                {
+                    var geometryFactory = provider.GetRequiredService<GeometryFactory>();
+                    config.AddProfile(new AutoMapperProfiles(geometryFactory));
+                }).CreateMapper()
+            );
+
             services.AddDbContext<ApplicationDbContext>(options =>
-            options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
+            options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection"),
+                sqlServerOptions => sqlServerOptions.UseNetTopologySuite()
+            ));
 
             services.AddControllers()
                 .AddNewtonsoftJson();
