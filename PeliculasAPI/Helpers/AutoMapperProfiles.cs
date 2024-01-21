@@ -11,7 +11,10 @@ namespace PeliculasAPI.Helpers
         {
             CreateMap<Genero, GeneroDTO>().ReverseMap();
             CreateMap<GeneroCreacionDTO, Genero>();
-            
+
+            CreateMap<SalaDeCine, SalaDeCineDTO>().ReverseMap();
+            CreateMap<SalaDeCineCreacionDTO, SalaDeCine>();
+
             CreateMap<Actor, ActorDTO>();
             //Desestimo la conversion del campo foto, ya que en un modelo es
             //de tipo IFormFile, y en el otro, es de tipo String
