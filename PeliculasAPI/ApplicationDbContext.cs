@@ -4,10 +4,12 @@ using NetTopologySuite.Geometries;
 using NetTopologySuite;
 using PeliculasAPI.Entidades;
 using Microsoft.EntityFrameworkCore.Migrations;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using System.Security.Claims;
 
 namespace PeliculasAPI
 {
-    public class ApplicationDbContext: DbContext
+    public class ApplicationDbContext: IdentityDbContext
     {
         public ApplicationDbContext(DbContextOptions options) : base(options)
         { 
@@ -37,6 +39,7 @@ namespace PeliculasAPI
         public DbSet<PeliculasGeneros> PeliculasGeneros { get; set;}
         public DbSet<SalaDeCine> SalasDeCine { get; set; }
         public DbSet<PeliculasSalasDeCine> PeliculasSalasDeCines { get; set; }
+        public DbSet<Review> Reviews { get; set; }
 
 
         //Add-Migration Generos
@@ -46,6 +49,9 @@ namespace PeliculasAPI
         //Add-Migration TablasSalasDeCine
         //Add-Migration SalasDeCineUbicacion
         //Add-Migration SalasDeCineData
+        //Add-Migration TablasIdentity
+        //Add-Migration AdminData
+        //Add-Migration TablaReviews
 
         //Update-Database
 
